@@ -1,41 +1,54 @@
-import React from 'react'
+import React, { useState, useEffect} from 'react'
 import BasicModal from '../common/BasicModal/BasicModal'
 import Box from '@mui/material/Box';
 import { TextField } from '@mui/material'; //* Importa el componente TextField de Material UI
 
-import { useForm } from 'react-hook-form'; //* Importa el hook useForm de react-hook-form
-import { yupResolver } from '@hookform/resolvers/yup'; //* Importa el hook yupResolver de @hookform/resolvers/yup
-import * as yup from 'yup'; //* Importa el hook yup de yup
+import { useForm } from 'react-hook-form';
+import { yupResolver } from '@hookform/resolvers/yup';
+import * as Yup from 'yup'
+
+const defaultValues = {
+    userId: '',
+    email: '',
+    phoneNumber: '',
+}
+
+
 
 export const NewUserModal = ({ open, onClose }) => {
+    const [values, setValues] = useState(defaultValues)
+
     const modalStyles = {
         inputFields: {
             display: 'flex',
             flexDirection: 'column',
-            marigntTop: '20px',
+            marginTop: '20px',
             marginBottom: '15px',
-            '.MuiInputRoot': {
+            '.MuiFormControl-root': {
                 marginBottom: '20px',
             },
         },
-    }
-    const validationSchema = yup.object().shape({
+    };
+
+    const phoneRegExp = /^((\\+[1-9]{1,4}[ \\-]*)|(\\([0-9]{2,3}\\)[ \\-]*)|([0-9]{2,4})[ \\-]*)*?[0-9]{3,4}?[ \\-]*[0-9]{3,4}?$/;
+
+    const validationSchema = Yup.object().shape({
         //TODO Este código establece una validación de esquema para los datos de un usuario.
         //TODO Esto significa que el código define los requisitos que los datos del usuario deben cumplir para ser válidos.
         //TODO Por ejemplo, el ID de usuario es requerido y debe tener al menos 6 caracteres, el email es requerido y debe ser un email 
         //TODO válido, y el número de teléfono debe coincidir con una expresión regular específica.
         //TODO Estas reglas se aplican a los datos del usuario antes de que sean guardados o procesados.
 
-        userId: yup.string()
+        userId: Yup.string()
         .required("El ID de usuario es requerido")
         .min(6,"El ID de usuario debe tener al menos 6 caracteres"),
 
-        email: yup.string()
+        email: Yup.string()
         .required("El email es requerido")
         .email("El email no es válido"),
 
-        phoneNumber: yup.string()
-        // .matches(phoneRegExp, "El número de teléfono no es válido")
+        phoneNumber: Yup.string()
+        .matches(phoneRegExp, "El número de teléfono no es válido")
 
 
     })
@@ -54,40 +67,48 @@ export const NewUserModal = ({ open, onClose }) => {
 
 
     const addUser = (data) => {
-        console.log(data)
+        //console.log(data)
     }
 
+    const handleChange = (value) => {
+        setValues(value) //* Guarda el valor del campo en el estado
+        console.log(value)
+    }
     //* Añade el contenido a la propiedad content del componente BasicModal, para poder añadir los inputs que se necesiten.
     //! Fijate que getContent tiene (contenido ) y no (contenido = {}) 
     const getContent = () => (
         <Box sx={modalStyles.inputFields}>
             <TextField
-                placeholder='User ID'
-                name = 'userId'
-                label='User ID'
-                required //* Campo obligatorio
-                {...register('userId')} //* Añade el hook register al input
-                error = {errors.userId ? true : false} //* Si hay un error, muestra el error
-                helperText = {errors.userId?.message} //* Si hay un error, muestra el mensaje de error
-                />
+                placeholder="User ID"
+                name="userId"
+                label="User ID"
+                required
+                {...register('userId')}
+                error={errors.userId ? true : false}
+                helperText={errors.userId?.message}
+                onChange={(event) => handleChange({...values,userId: event.target.value})} //* Captura el valor del campo y lo pasa a la función handleChange para que se guarde en el estado.
+                
+            />
                 <TextField
                 placeholder='Email'
                 name = 'email'
                 label='Email'
-                required //* Campo obligatorio
-                {...register('email')} //* Añade el hook register al input
-                error = {errors.email ? true : false} //* Si hay un error, muestra el error
+                required 
+                {...register('email')} 
+                error = {errors.email ? true : false} 
                 helperText = {errors.email?.message} //* Si hay un error, muestra el mensaje de error
+                onChange={(event) => handleChange({...values,email: event.target.value})} //* Captura el valor del campo y lo pasa a la función handleChange para que se guarde en el estado.
                 />  
 
             <TextField
                 placeholder=''
-                name = 'PhoneNumber'
+                name = 'phoneNumber'
                 label='Phone Number'
                 required //* Campo obligatorio
                 {...register('phoneNumber')} //* Añade el hook register al input
                 error = {errors.phoneNumber ? true : false} //* Si hay un error, muestra el error
                 helperText = {errors.phoneNumber?.message} //* Si hay un error, muestra el mensaje de error
+                onChange={(event) => handleChange({...values,phoneNumber: event.target.value})} //* Captura el valor del campo y lo pasa a la función handleChange para que se guarde en el estado.
                 />
            
       </Box>
@@ -108,13 +129,13 @@ export const NewUserModal = ({ open, onClose }) => {
         open={open}
         onClose={onClose}
         title="New user"
-        subTitle="Rellena los campos para crear un nuevo usuario  "
-        content = {getContent()} 
-        validate = {handleSubmit(addUser)} //* Cuando el usuario haga clic en el botón de validación, se llamará a la función addUser. a través del hook handleSubmit
+        subTitle="Rellena los campos para crear un nuevo usuario "
+        content = {getContent()}  
+        onSubmit = {handleSubmit(addUser)} 
     >
 
     </BasicModal>
   )
 }
-
+//! 21:13
 export default NewUserModal
